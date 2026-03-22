@@ -3,14 +3,21 @@
   "sites": [
     {
       "key": "Madou_Official",
-      "name": "🔥麻豆｜强制显示标签",
+      "name": "🔥麻豆｜独立测试版",
       "type": 3,
       "api": "https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/drpy2.min.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "class_name": "精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字",
-      "class_url": "13678&13679&13682&30521&30526&30522&13726",
+      "classes": [
+        {"type_name": "精选好片", "type_id": "13678"},
+        {"type_name": "MSD系列", "type_id": "13679"},
+        {"type_name": "淫欲中国", "type_id": "13682"},
+        {"type_name": "传媒片商", "type_id": "30521"},
+        {"type_name": "国产视频", "type_id": "30526"},
+        {"type_name": "日本AV", "type_id": "30522"},
+        {"type_name": "欧美中字", "type_id": "13726"}
+      ],
       "ext": {
         "host": "https://madou.com",
         "url": "/topic/0/fyclass/0/fypage/",
@@ -20,8 +27,6 @@
           "Referer": "https://madou.com/",
           "Cookie": "isAgeModalShownKey=true; is_mobile=1"
         },
-        "class_name": "精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字",
-        "class_url": "13678&13679&13682&30521&30526&30522&13726",
         "一级": "js: try { var items = []; var html = request(input); if (!html) { items.push({title: '⚠️ 网页请求完全没有响应', img: '', desc: '网络问题', url: input}); } else if (html.indexOf('Cloudflare') !== -1 || html.indexOf('Just a moment') !== -1) { items.push({title: '⚠️ 被防火墙拦截了', img: '', desc: '防爬拦截', url: input}); } else { var list = pdfa(html, '.cardBox, .section-content__item'); if (list.length === 0) { items.push({title: '⚠️ 访问成功，但没找到视频卡片', img: '', desc: '网页改版或API加载', url: input}); } else { list.forEach(function(it) { var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt'); var img = pd(it, 'img&&data-src') || pd(it, 'img&&src'); var url = pd(it, 'a&&href'); if (title && url) { items.push({ title: title.trim(), img: img, desc: pdfh(it, '.cardTag&&Text') || 'HD', url: url }); } }); } } setResult(items); } catch(e) { setResult([{title: '❌ JS报错: ' + e.message, img: '', desc: '', url: input}]); }",
         "二级": {
           "title": "h1&&Text",
