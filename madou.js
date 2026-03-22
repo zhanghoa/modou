@@ -5,7 +5,7 @@ var rule = {
     url: '/topic/0/fyclass/fypage/',
     headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Referer': 'https://madou.com/',
+        'Referer': 'https://d2r1iw2cxonh4q.cloudfront.net/',
         'Cookie': 'isAgeModalShownKey=true; is_mobile=0'
     },
     class_name: '精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字',
