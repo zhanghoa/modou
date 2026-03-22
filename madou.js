@@ -1,6 +1,6 @@
 var rule = {
     title: '麻豆官方-多线路版',
-    host: 'https://madou.com',
+    host: 'https://d2r1iw2cxonh4q.cloudfront.net/',
     url: '/topic/0/fyclass/fypage/',
     searchUrl: '/searchvideo/**/fypage/',
     searchable: 2,
@@ -8,7 +8,7 @@ var rule = {
     filterable: 0,
     headers: {
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-        'Referer': 'https://madou.com/',
+        'Referer': 'https://d2r1iw2cxonh4q.cloudfront.net/',
         'Cookie': 'isAgeModalShownKey=true'
     },
     class_name: '精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字',
@@ -24,7 +24,7 @@ var rule = {
         if (m_path) { \
             var playUrl = m_path[1].replace(/\\\\u0026/g, '&'); \
             VOD.vod_play_from = '官方线路A$$$核心线路B$$$备用线路C'; \
-            var urlA = 'https://madou.com/h5/m3u8/' + playUrl; \
+            var urlA = 'https://d2r1iw2cxonh4q.cloudfront.net/h5/m3u8/' + playUrl; \
             var urlB = 'https://lmdi048.com/h5/m3u8/' + playUrl; \
             var urlC = 'https://madou27.com/h5/m3u8/' + playUrl; \
             VOD.vod_play_url = '播放$' + urlA + '$$$播放$' + urlB + '$$$播放$' + urlC; \
