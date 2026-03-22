@@ -1,5 +1,5 @@
 var rule = {
-    title: '麻豆官方-修复版',
+    title: '麻豆官方-终极修复',
     host: 'https://madou.com',
     url: '/topic/0/fyclass/fypage/',
     searchUrl: '/searchvideo/**/fypage/',
@@ -17,31 +17,37 @@ var rule = {
 
     一级: "js: var items = []; var html = request(input); var m = html.match(/var dataJson = '(.*?)';/); if (m) { var raw = m[1].replace(/\\\\u0022/g, '\"').replace(/\\\\u002f/g, '/'); try { var data = JSON.parse(raw).data; var list = data.videoInfos || data.videoInfosList || []; list.forEach(function(it) { if (it.id > 0) { items.push({ title: it.title, img: it.coverImg, desc: it.creatorName || '麻豆', url: '/archives/' + it.id + '/' }); } }); } catch(e) {} } setResult(items);",
     
-    二级: "js: var html = request(input); var VOD = { vod_name: '未知视频', vod_remarks: '多线路' }; \
-        /* 1. 解析播放路径 */ \
-        var m_path = html.match(/const path = \"(.*?)\";/); \
-        if (m_path) { \
-            var playUrl = m_path[1].replace(/\\\\u0026/g, '&'); \
-            VOD.vod_play_from = '官方线路A$$$优化线路B'; \
-            var urlA = 'https://madou.com/h5/m3u8/' + playUrl; \
-            var urlB = 'https://lmdi048.com/h5/m3u8/' + playUrl; \
-            VOD.vod_play_url = '播放$' + urlA + '$$$播放$' + urlB; \
-        } \
-        /* 2. 解析详情数据（图片、简介、标题） */ \
-        var m_json = html.match(/var dataJson = '(.*?)';/); \
-        if (m_json) { \
-            try { \
-                var raw = m_json[1].replace(/\\\\u0022/g, '\"').replace(/\\\\u002f/g, '/'); \
+    // 【核心改进】二级详情页采用多重匹配，防崩逻辑
+    二级: "js: var html = request(input); var VOD = { vod_name: '解析失败', vod_remarks: '请刷新' }; \
+        try { \
+            var m_json = html.match(/var dataJson = '(.*?)';/); \
+            if (m_json) { \
+                var raw = m_json[1].replace(/\\\\u0022/g, '\"').replace(/\\\\u002f/g, '/').replace(/\\\\u0026/g, '&'); \
                 var res = JSON.parse(raw); \
-                var info = res.data.videoInfo || res.data; \
-                VOD.vod_name = info.title || ''; \
+                var info = res.data.videoInfo || (res.data.videoInfos ? res.data.videoInfos[0] : res.data); \
+                VOD.vod_name = info.title || '无标题'; \
                 VOD.vod_pic = info.coverImg || ''; \
-                VOD.vod_content = info.desc || info.intro || '暂无简介'; \
-                VOD.vod_director = info.creatorName || '麻豆'; \
-                VOD.type_name = info.categoryName || ''; \
-            } catch(e) { \
-                log('二级解析错误: ' + e.message); \
+                VOD.vod_content = info.desc || info.intro || '暂无剧情简介'; \
+                VOD.vod_remarks = info.creatorName || '官方源'; \
+                \
+                /* 提取线路地址 */ \
+                var playPath = ''; \
+                if (info.video && info.video.url) { \
+                    playPath = info.video.url; \
+                } else { \
+                    var m_path = html.match(/const path = \"(.*?)\";/); \
+                    if (m_path) playPath = m_path[1].replace(/\\\\u0026/g, '&'); \
+                } \
+                \
+                if (playPath) { \
+                    VOD.vod_play_from = '核心线路(快)$$$官方备用'; \
+                    var urlA = 'https://lmdi048.com/h5/m3u8/' + playPath; \
+                    var urlB = 'https://madou.com/h5/m3u8/' + playPath; \
+                    VOD.vod_play_url = '播放$' + urlA + '$$$播放$' + urlB; \
+                } \
             } \
+        } catch(e) { \
+            VOD.vod_content = '解析出错:' + e.message; \
         } \
         setResult(VOD);",
 
