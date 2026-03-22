@@ -1,6 +1,10 @@
 {
+  "spider": "https://git.yylx.win/https://raw.githubusercontent.com/fantaiying7/EXT/refs/heads/main/drpy2.min.js",
+  "wallpaper": "https://tu.ltyuan.com/api/random.php",
+  "sites": [
+    {
       "key": "Madou_Official",
-      "name": "🔥麻豆｜完美克隆版",
+      "name": "🔥麻豆｜终极克隆版",
       "type": 3,
       "api": "https://git.yylx.win/https://raw.githubusercontent.com/fantaiying7/EXT/refs/heads/main/drpy2.min.js",
       "searchable": 1,
@@ -8,3 +12,7 @@
       "filterable": 1,
       "ext": "https://git.yylx.win/https://raw.githubusercontent.com/zhanghoa/modou/refs/heads/main/madou.js"
     }
+  ],
+  "parses": [],
+  "rules": []
+}
