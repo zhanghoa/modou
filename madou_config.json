@@ -1,80 +1,78 @@
 {
-  "spider": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hjdhnx/dr_py/main/lib/drpy2.min.js",
-  "wallpaper": "https://picsum.photos/1920/1080",
-  "sites": [
-    {
-      "key": "Madou_Official",
-      "name": "🔥麻豆传媒｜官方直连",
-      "type": 3,
-      "api": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hjdhnx/dr_py/main/lib/drpy2.min.js",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": {
-        "title": "麻豆传媒",
-        "host": "https://madou.com",
-        "url": "/topic/0/fyclass/0/fypage/",
-        "searchUrl": "/searchvideo/**/fypage/",
-        "headers": {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-          "Referer": "https://madou.com/"
-        },
-        "class_name": "麻豆精选&传媒片商&国产视频&日本AV&欧美中字",
-        "class_url": "13678&30521&30526&30522&13726",
-        "一级": "js:var items=[];var html=request(input);var swipers=pdfa(html,'.swiper-main .swiper-slide');swipers.forEach(function(it){items.push({title:pdfh(it,'a&&aria-label'),img:pd(it,'img&&data-src-pc')||pd(it,'img&&data-src-mobile'),desc:'推荐',url:pd(it,'a&&href')})});var cards=pdfa(html,'.cardBox, .stui-vodlist li');cards.forEach(function(it){items.push({title:pdfh(it,'.cardTitle&&Text')||pdfh(it,'a&&title'),img:pd(it,'img&&data-src')||pd(it,'img&&data-original'),desc:pdfh(it,'.cardTag&&Text')||'视频',url:pd(it,'a&&href')})});setResult(items);",
-        "二级": {
-          "title": "h1&&Text",
-          "img": "js:var html=request(input);var post=html.match(/posterImg\\s*=\\s*\"(.*?)\"/);input=post?post[1]:'';",
-          "desc": ".gldetail-new-breadcrumb&&Text",
-          "content": "meta[property='og:description']&&content",
-          "tabs": "js:TABS=['官方极速源']",
-          "lists": "js:LISTS=[[input]]"
-        },
-        "lazy": "js:var html=request(input);var pathMatch=html.match(/const\\s+path\\s*=\\s*\"(.*?)\"/);if(pathMatch){var path=pathMatch[1];var realUrl='https://madou.com/h5/m3u8/'+path.replace(/\\\\u0026/g,'&');input={jx:0,url:realUrl,parse:0}}else{input={jx:0,url:input,parse:1}}",
-        "搜索": ".cardBox; .cardTitle&&Text; img&&data-src; .cardTitle&&Text; a&&href"
-      }
+  "key": "Madou_Official",
+  "name": "🔥麻豆传媒｜跳过认证版",
+  "type": 3,
+  "api": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hjdhnx/dr_py/main/lib/drpy2.min.js",
+  "searchable": 1,
+  "quickSearch": 1,
+  "ext": {
+    "title": "麻豆传媒",
+    "host": "https://madou.com",
+    "url": "/topic/0/fyclass/0/fypage/",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      "Referer": "https://madou.com/",
+      "Cookie": "isAgeModalShownKey=true; is_mobile=1" 
     },
-    {
-      "key": "push_agent",
-      "name": "📺推送｜投屏",
-      "type": 3,
-      "api": "push_agent",
-      "searchable": 0,
-      "quickSearch": 0
-    }
-  ],
-  "parses": [
-    {
-      "name": "智能并发解析",
-      "type": 3,
-      "url": "Demo"
+    // 强制声明分类，确保导航栏出现
+    "class_name": "精选好片&麻豆MSD&后宫淫乱&SM调教&情趣综艺&女优试镜",
+    "class_url": "13678&13679&13682&13683&15091&13684",
+    
+    "一级": "js:
+        var items = [];
+        // 增加超时处理，防止被弹窗卡死
+        var html = request(input);
+        
+        // 调试代码：如果列表为空，尝试从整个页面抓取所有 a 标签
+        var cards = pdfa(html, '.cardBox, .section-content__item, .swiper-slide');
+        
+        if (cards.length === 0) {
+            // 如果按照类名抓不到，说明页面可能被拦截或结构变化，尝试暴力抓取带 archives 的链接
+            var links = pdfa(html, 'a[href*=\"archives\"]');
+            links.forEach(function(it) {
+                var title = pdfh(it, '&&Text') || '精彩视频';
+                var img = pd(it, 'img&&data-src') || pd(it, 'img&&src');
+                if (img) {
+                    items.push({
+                        title: title.trim(),
+                        img: img,
+                        url: pd(it, '&&href')
+                    });
+                }
+            });
+        } else {
+            cards.forEach(function(it) {
+                var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'a&&aria-label') || pdfh(it, 'img&&alt');
+                var img = pd(it, 'img&&data-src') || pd(it, 'img&&data-src-pc') || pd(it, 'img&&src');
+                if (title && img) {
+                    items.push({
+                        title: title,
+                        img: img,
+                        desc: pdfh(it, '.cardTag&&Text') || 'HD',
+                        url: pd(it, 'a&&href')
+                    });
+                }
+            });
+        }
+        setResult(items);
+    ",
+    
+    "二级": {
+        "title": "h1&&Text",
+        "img": "js: var html=request(input); var post=html.match(/posterImg\\s*=\\s*\"(.*?)\"/); input=post?post[1]:'';",
+        "tabs": "js: TABS=['官方源']",
+        "lists": "js: LISTS=[[input]]"
     },
-    {
-      "name": "全能解析",
-      "type": 1,
-      "url": "https://jx.jsonplayer.com/player/?url=",
-      "header": {
-        "User-Agent": "Mozilla/5.0"
-      }
-    }
-  ],
-  "rules": [
-    {
-      "name": "m3u8优化",
-      "hosts": [
-        "madou.com"
-      ],
-      "regex": [
-        "#EXT-X-DISCONTINUITY"
-      ]
-    }
-  ],
-  "lives": [
-    {
-      "name": "默认直播",
-      "type": 0,
-      "url": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u",
-      "playerType": 1
-    }
-  ]
+    
+    "lazy": "js:
+        var html = request(input);
+        var pathMatch = html.match(/const\\s+path\\s*=\\s*\"(.*?)\"/);
+        if (pathMatch) {
+            var path = pathMatch[1].replace(/\\\\u0026/g, '&');
+            input = { jx: 0, url: 'https://madou.com/h5/m3u8/' + path, parse: 0 };
+        } else {
+            input = { jx: 0, url: input, parse: 1 };
+        }
+    "
+  }
 }
