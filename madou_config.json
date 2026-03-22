@@ -5,7 +5,7 @@
       "key": "Madou_Official",
       "name": "🔥麻豆传媒｜官方排错测试",
       "type": 3,
-      "api": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hjdhnx/dr_py/main/lib/drpy2.min.js",
+      "api": "https://raw.githubusercontent.com/hjdhnx/dr_py/main/lib/drpy2.min.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
