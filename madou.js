@@ -14,53 +14,13 @@ var rule = {
     class_name: '精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字',
     class_url: '13678&13679&13682&30521&30526&30522&13726',
     play_parse: true,
-    lazy: `js:
-        var html = request(input);
-        var m = html.match(/const\\s+path\\s*=\\s*"(.*?)"/);
-        if (m) {
-            var p = m[1].replace(/\\\\u0026/g, '&');
-            input = { jx: 0, url: 'https://madou.com/h5/m3u8/' + p, parse: 0 };
-        } else {
-            input = { jx: 0, url: input, parse: 1 };
-        }
-    `,
+    lazy: "js: var html = request(input); var m = html.match(/const\\s+path\\s*=\\s*\"(.*?)\"/); if (m) { var p = m[1].replace(/\\\\u0026/g, '&'); input = { jx: 0, url: 'https://madou.com/h5/m3u8/' + p, parse: 0 }; } else { input = { jx: 0, url: input, parse: 1 }; }",
     limit: 6,
     推荐: '',
-    一级: `js:
-        try {
-            var items = [];
-            var html = request(input);
-            if (!html) {
-                items.push({title: '⚠️ 网页完全无响应', img: '', desc: '网络问题', url: input});
-            } else if (html.indexOf('Cloudflare') !== -1 || html.indexOf('Just a moment') !== -1) {
-                items.push({title: '⚠️ 被网站防爬防火墙拦截', img: '', desc: '防爬拦截', url: input});
-            } else {
-                var list = pdfa(html, '.cardBox, .section-content__item');
-                if (list.length === 0) {
-                    items.push({title: '⚠️ 访问成功，但无视频卡片', img: '', desc: '网页改版', url: input});
-                } else {
-                    list.forEach(function(it) {
-                        var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt');
-                        var img = pd(it, 'img&&data-src') || pd(it, 'img&&src');
-                        var url = pd(it, 'a&&href');
-                        if (title && url) {
-                            items.push({ title: title.trim(), img: img, desc: pdfh(it, '.cardTag&&Text') || 'HD', url: url });
-                        }
-                    });
-                }
-            }
-            setResult(items);
-        } catch(e) {
-            setResult([{title: '❌ 报错: ' + e.message, img: '', desc: '', url: input}]);
-        }
-    `,
+    一级: "js: try { var items = []; var html = request(input); if (!html) { items.push({title: '⚠️ 网页完全无响应', img: '', desc: '网络问题', url: input}); } else if (html.indexOf('Cloudflare') !== -1 || html.indexOf('Just a moment') !== -1) { items.push({title: '⚠️ 被网站防爬防火墙拦截', img: '', desc: '防爬拦截', url: input}); } else { var list = pdfa(html, '.cardBox, .section-content__item'); if (list.length === 0) { items.push({title: '⚠️ 访问成功，但无视频卡片', img: '', desc: '网页改版', url: input}); } else { list.forEach(function(it) { var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt'); var img = pd(it, 'img&&data-src') || pd(it, 'img&&src'); var url = pd(it, 'a&&href'); if (title && url) { items.push({ title: title.trim(), img: img, desc: pdfh(it, '.cardTag&&Text') || 'HD', url: url }); } }); } } setResult(items); } catch(e) { setResult([{title: '❌ 报错: ' + e.message, img: '', desc: '', url: input}]); }",
     二级: {
         "title": "h1&&Text",
-        "img": `js:
-            var html = request(input);
-            var m = html.match(/posterImg\\s*=\\s*"(.*?)"/);
-            input = m ? m[1] : '';
-        `,
+        "img": "js: var html = request(input); var m = html.match(/posterImg\\s*=\\s*\"(.*?)\"/); input = m ? m[1] : '';",
         "desc": ".gldetail-new-breadcrumb&&Text",
         "content": "meta[name='description']&&content",
         "tabs": "js: TABS=['官方源']",
