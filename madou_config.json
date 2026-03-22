@@ -3,7 +3,7 @@
   "sites": [
     {
       "key": "Madou_Official",
-      "name": "🔥麻豆传媒｜官方修复",
+      "name": "🔥麻豆传媒｜官方排错测试",
       "type": 3,
       "api": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hjdhnx/dr_py/main/lib/drpy2.min.js",
       "searchable": 1,
@@ -18,9 +18,16 @@
           "Referer": "https://madou.com/",
           "Cookie": "isAgeModalShownKey=true; is_mobile=1"
         },
-        "class_name": "精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字",
-        "class_url": "13678&13679&13682&30521&30526&30522&13726",
-        "一级": "js: var items = []; var html = request(input); var list = pdfa(html, '.cardBox, .section-content__item'); list.forEach(function(it) { var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt'); var img = pd(it, 'img&&data-src') || pd(it, 'img&&src'); var url = pd(it, 'a&&href'); if (title && url) { items.push({ title: title.trim(), img: img, desc: pdfh(it, '.cardTag&&Text') || 'HD', url: url }); } }); setResult(items);",
+        "classes": [
+          {"type_name": "精选好片", "type_id": "13678"},
+          {"type_name": "MSD系列", "type_id": "13679"},
+          {"type_name": "淫欲中国", "type_id": "13682"},
+          {"type_name": "传媒片商", "type_id": "30521"},
+          {"type_name": "国产视频", "type_id": "30526"},
+          {"type_name": "日本AV", "type_id": "30522"},
+          {"type_name": "欧美中字", "type_id": "13726"}
+        ],
+        "一级": "js: var items = []; var html = request(input); if (!html || html.length < 50) { items.push({title: '⚠️ 请求失败或超时', img: '', desc: '网络问题', url: input}); } else if (html.indexOf('Cloudflare') !== -1 || html.indexOf('Just a moment') !== -1 || html.indexOf('502 Bad Gateway') !== -1) { items.push({title: '⚠️ 被网站防火墙(CF盾)拦截了', img: '', desc: '防爬虫拦截', url: input}); } else { var list = pdfa(html, '.cardBox, .section-content__item'); if (list.length === 0) { items.push({title: '⚠️ 没找到列表类名，可能是动态网页或改版', img: '', desc: '解析失败', url: input}); items.push({title: '源码片段: ' + html.substring(0, 100).replace(/<|>/g, ''), img: '', desc: '', url: input}); } else { list.forEach(function(it) { var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt'); var img = pd(it, 'img&&data-src') || pd(it, 'img&&src'); var url = pd(it, 'a&&href'); if (title && url) { items.push({ title: title.trim(), img: img, desc: pdfh(it, '.cardTag&&Text') || 'HD', url: url }); } }); } } setResult(items);",
         "二级": {
           "title": "h1&&Text",
           "img": "js: var html = request(input); var m = html.match(/posterImg\\s*=\\s*\"(.*?)\"/); input = m ? m[1] : '';",
