@@ -20,52 +20,16 @@
         },
         "class_name": "精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字",
         "class_url": "13678&13679&13682&30521&30526&30522&13726",
-        
-        "一级": "js:
-          var items = [];
-          var html = request(input);
-          // 适配卡片容器 .cardBox 或 .section-content__item
-          var list = pdfa(html, '.cardBox, .section-content__item');
-          list.forEach(function(it) {
-            var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt');
-            var img = pd(it, 'img&&data-src') || pd(it, 'img&&src');
-            var url = pd(it, 'a&&href');
-            if (title && url) {
-              items.push({
-                title: title.trim(),
-                img: img,
-                desc: pdfh(it, '.cardTag&&Text') || 'HD',
-                url: url
-              });
-            }
-          });
-          setResult(items);
-        ",
-        
+        "一级": "js: var items = []; var html = request(input); var list = pdfa(html, '.cardBox, .section-content__item'); list.forEach(function(it) { var title = pdfh(it, '.cardTitle&&Text') || pdfh(it, 'img&&alt'); var img = pd(it, 'img&&data-src') || pd(it, 'img&&src'); var url = pd(it, 'a&&href'); if (title && url) { items.push({ title: title.trim(), img: img, desc: pdfh(it, '.cardTag&&Text') || 'HD', url: url }); } }); setResult(items);",
         "二级": {
           "title": "h1&&Text",
-          "img": "js: 
-            var html = request(input);
-            var m = html.match(/posterImg\\s*=\\s*\"(.*?)\"/);
-            input = m ? m[1] : '';
-          ",
+          "img": "js: var html = request(input); var m = html.match(/posterImg\\s*=\\s*\"(.*?)\"/); input = m ? m[1] : '';",
           "desc": ".gldetail-new-breadcrumb&&Text",
           "content": "meta[name='description']&&content",
           "tabs": "js: TABS=['官方源']",
           "lists": "js: LISTS=[[input]]"
         },
-        
-        "lazy": "js:
-          var html = request(input);
-          // 这里的正则修正了路径提取逻辑
-          var m = html.match(/const\\s+path\\s*=\\s*\"(.*?)\"/);
-          if (m) {
-            var p = m[1].replace(/\\\\u0026/g, '&');
-            input = { jx: 0, url: 'https://madou.com/h5/m3u8/' + p, parse: 0 };
-          } else {
-            input = { jx: 0, url: input, parse: 1 };
-          }
-        "
+        "lazy": "js: var html = request(input); var m = html.match(/const\\s+path\\s*=\\s*\"(.*?)\"/); if (m) { var p = m[1].replace(/\\\\u0026/g, '&'); input = { jx: 0, url: 'https://madou.com/h5/m3u8/' + p, parse: 0 }; } else { input = { jx: 0, url: input, parse: 1 }; }"
       }
     }
   ]
