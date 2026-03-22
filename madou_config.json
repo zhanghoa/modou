@@ -1,25 +1,10 @@
 {
-  "spider": "https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/drpy2.min.js",
-  "wallpaper": "https://tu.ltyuan.com/api/random.php",
-  "sites": [
-    {
       "key": "Madou_Official",
-      "name": "🔥麻豆｜强制显示菜单",
+      "name": "🔥麻豆｜完美克隆版",
       "type": 3,
-      "api": "https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/drpy2.min.js",
+      "api": "https://git.yylx.win/https://raw.githubusercontent.com/fantaiying7/EXT/refs/heads/main/drpy2.min.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "classes": [
-        {"type_name": "精选好片", "type_id": "13678"},
-        {"type_name": "MSD系列", "type_id": "13679"},
-        {"type_name": "淫欲中国", "type_id": "13682"},
-        {"type_name": "传媒片商", "type_id": "30521"},
-        {"type_name": "国产视频", "type_id": "30526"},
-        {"type_name": "日本AV", "type_id": "30522"},
-        {"type_name": "欧美中字", "type_id": "13726"}
-      ],
-      "ext": "https://ghproxy.net/https://raw.githubusercontent.com/zhanghoa/modou/main/madou_config.js"
+      "ext": "https://git.yylx.win/https://raw.githubusercontent.com/zhanghoa/modou/refs/heads/main/madou.js"
     }
-  ]
-}
