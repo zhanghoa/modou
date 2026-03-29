@@ -1,69 +1,47 @@
 var rule = {
-    title: '麻豆-终极抗封锁版',
+    title: '麻豆CloudFront',
     host: 'https://d2r1iw2cxonh4q.cloudfront.net',
-    url: '/topic/0/fyclass/fypage/',
-    headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Referer': 'https://madou.com/'
-    },
-    class_name: '精选好片&MSD系列&淫欲中国&传媒片商&国产视频&日本AV&欧美中字',
-    class_url: '13678&13679&13682&30521&30526&30522&13726',
     
-    // 开启嗅探引擎支持
+    // 分类链接
+    url: '/topic/17521/fyclass/fypage/', 
+    
+    // 从导航栏提取的分类名与分类ID
+    class_name: '精选好片&麻豆出品&女优试镜&爱豆传媒&星空传媒&精东影业&天美传媒&果冻传媒&91制片厂&大象传媒&福利姬&探花大神&黑料吃瓜&日本禁忌&制服OL&无码中出&中文字幕&欧美经典',
+    class_url: '13678&13679&13684&13687&13686&13688&13931&13712&15812&15815&13713&13715&15153&13719&13722&13725&13726&13731', 
+
+    // 搜索接口
+    searchUrl: '/searchvideo/**', 
+    searchable: 2,
+    quickSearch: 1,
+    filterable: 0,
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+    },
+    
+    // 开启解析，作为后备手段
     play_parse: true,
+    lazy: '', 
+    limit: 6,
 
-    // 一级：列表页提取 (使用最稳妥的单层正则 + JSON.parse)
-    一级: "js: var items=[]; try { var html=request(input); var m=html.match(/dataJson\\s*=\\s*['\"](.*?)['\"]/); if(m){ var raw=m[1].replace(/\\\\u0022/g, '\"'); var res=JSON.parse(raw); var list=res.data.videoInfos||res.data.videoInfosList||[]; list.forEach(function(it){ if(it.id>0){ items.push({title:it.title, img:it.coverImg, desc:it.creatorName, url:'/archives/'+it.id+'/'}); } }); } } catch(e){} setResult(items);",
+    // 推荐（首页）规则：提取列表页的内容，过滤掉广告(通过:has(a[data-type="0"])排除广告)
+    // 格式: 列表块; 标题; 图片; 描述(时长); 链接
+    推荐: '.section-content__item:has(a[data-type="0"]); h3&&Text; img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 二级：双轨策略。能抓到就抓，抓不到就抛给嗅探器。
-    二级: "js: \
-        var VOD = {vod_name: '加载中...', vod_content: '正在获取数据...'}; \
-        try { \
-            var html = request(input); \
-            /* 如果被 CDN 拦截，网页内容会非常短或为空 */ \
-            if (!html || html.length < 500) { \
-                VOD.vod_content = '⚠️ 提示：详情页被 CDN 防火墙拦截，无法提取文字简介。但底层嗅探器可能已捕获视频流，请直接点击【嗅探播放】尝试观看！'; \
-                VOD.vod_play_from = '网页嗅探'; \
-                VOD.vod_play_url = '嗅探播放$' + input; \
-            } else { \
-                /* 如果没有被拦截，使用最原始暴力的正则直接抠字符串，避开所有的层级嵌套报错 */ \
-                var m = html.match(/dataJson\\s*=\\s*['\"](.*?)['\"]/); \
-                if (m) { \
-                    var raw = m[1]; \
-                    /* 提取标题 */ \
-                    var tMatch = raw.match(/\\\\u0022title\\\\u0022:\\\\u0022(.*?)\\\\u0022/); \
-                    if(tMatch) VOD.vod_name = tMatch[1].replace(/\\\\u([0-9a-fA-F]{4})/g, function(a,b){return String.fromCharCode(parseInt(b,16));}); \
-                    \
-                    /* 提取汉字简介 */ \
-                    var dMatch = raw.match(/\\\\u0022desc\\\\u0022:\\\\u0022(.*?)\\\\u0022/); \
-                    if(dMatch) VOD.vod_content = dMatch[1].replace(/\\\\u([0-9a-fA-F]{4})/g, function(a,b){return String.fromCharCode(parseInt(b,16));}); \
-                    \
-                    /* 提取播放地址 */ \
-                    var uMatch = raw.match(/\\\\u0022url\\\\u0022:\\\\u0022(.*?)\\\\u0022/); \
-                    if(uMatch) { \
-                        var p = uMatch[1].replace(/\\\\\\\\/g, '').replace(/\\\\u0026/g, '&').replace(/^\\//, ''); \
-                        VOD.vod_play_from = '官方直连'; \
-                        VOD.vod_play_url = '立即播放$https://d2r1iw2cxonh4q.cloudfront.net/h5/m3u8/' + p; \
-                    } else { \
-                        /* 没找到地址，退回嗅探模式 */ \
-                        VOD.vod_play_from = '网页嗅探'; \
-                        VOD.vod_play_url = '嗅探播放$' + input; \
-                    } \
-                } \
-            } \
-        } catch(e) { \
-            VOD.vod_content = '解析错误:' + e.message; \
-            VOD.vod_play_from = '网页嗅探'; \
-            VOD.vod_play_url = '嗅探播放$' + input; \
-        } \
-        setResult(VOD);",
+    // 一级（分类列表页）规则：与推荐规则一致
+    一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 播放兜底逻辑：如果是直连 m3u8 就直接播，如果是网页就交给内核嗅探 (parse: 1)
-    lazy: "js: \
-        if (input.indexOf('.m3u8') !== -1) { \
-            input = { jx: 0, url: input, parse: 0 }; \
-        } else { \
-            /* 启用底层 WebView 嗅探，利用你日志里成功的那个逻辑 */ \
-            input = { jx: 0, url: input, parse: 1, header: JSON.stringify({'User-Agent': 'Mozilla/5.0'}) }; \
-        }"
+    // 搜索结果页规则
+    搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; img&&data-src; .cover-duration&&Text; a&&href',
+
+    // 二级（详情页）规则：提取演员、番号、简介，并利用 JS 直接提取直链
+    二级: {
+        "title": "h1&&Text",
+        "img": "", // 留空，TVBox会自动继承一级列表的封面图
+        // desc 格式依次为：演员; 年代(发行日期); 地区; 状态(番号); 导演
+        "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
+        "content": ".vd-infos__desc&&Text",
+        "tabs": "js:TABS=['直链秒播']",
+        // 核心魔法：使用 JS 正则直接从网页代码中抠出 const path = "..." 里的 m3u8 地址，清洗转义符后拼接成真实播放直链
+        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$https://d2r1iw2cxonh4q.cloudfront.net/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
+    }
 };
