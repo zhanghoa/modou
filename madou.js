@@ -15,7 +15,8 @@ var rule = {
     quickSearch: 1,
     filterable: 0,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'Referer': 'https://d2r1iw2cxonh4q.cloudfront.net/'
     },
     
     // 开启解析，作为后备手段
@@ -23,15 +24,14 @@ var rule = {
     lazy: '', 
     limit: 6,
 
-    // 推荐（首页）规则：提取列表页的内容，过滤掉广告(通过:has(a[data-type="0"])排除广告)
-    // 格式: 列表块; 标题; 图片; 描述(时长); 链接
-    推荐: '.section-content__item:has(a[data-type="0"]); h3&&Text; img&&data-src; .cover-duration&&Text; a&&href',
+    // 推荐（首页）规则
+    推荐: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 一级（分类列表页）规则：与推荐规则一致
-    一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; img&&data-src; .cover-duration&&Text; a&&href',
+    // 一级（分类列表页）规则
+    一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
     // 搜索结果页规则
-    搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; img&&data-src; .cover-duration&&Text; a&&href',
+    搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
     // 二级（详情页）规则：提取演员、番号、简介，并利用 JS 直接提取直链
     二级: {
