@@ -1,6 +1,6 @@
 var rule = {
     title: '麻豆CloudFront',
-    host: 'https://d37o7jrn9y6vs2.cloudfront.net/',
+    host: 'https://d37o7jrn9y6vs2.cloudfront.net',
     
     // 分类链接
     url: '/topic/17521/fyclass/fypage/', 
