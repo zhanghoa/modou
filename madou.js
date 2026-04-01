@@ -1,8 +1,8 @@
 var rule = {
     title: '麻豆CloudFront',
-    host: 'https://gnrre.com/', // 作为初始跳板地址
+    host: 'https://gnrre.com/', // 初始跳板入口
     
-    // 【核心新增】预处理：自动拦截 301 跳转，动态更新最新域名
+    // 【核心一】预处理：自动拦截 301 跳转，动态更新最新域名
     预处理: `js:
         try {
             let res = req(rule.host, { 
@@ -59,15 +59,43 @@ var rule = {
     // 搜索结果页规则
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 二级（详情页）规则：提取演员、番号、简介，并利用 JS 直接提取直链
+    // 【核心二】二级（详情页）规则：智能解析 M3U8 直链
     二级: {
         "title": "h1&&Text",
         "img": "", // 留空，TVBox会自动继承一级列表的封面图
-        // desc 格式依次为：演员; 年代(发行日期); 地区; 状态(番号); 导演
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
         "tabs": "js:TABS=['直链秒播']",
-        // 【已修复】将写死的 https://gnrre.com 替换为动态的 rule.host
-        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$'+rule.host+'/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
+        "lists": `js:
+            try {
+                // 1. 动态提取当前所在详情页的真实主域名
+                let realHost = input.match(/https?:\\/\\/[^\\/]+/)[0];
+                
+                // 2. 提取视频 path，兼容源码中可能多出的空格
+                let pathMatch = html.match(/const\\s+path\\s*=\\s*["']([^"']+)["']/);
+                
+                if (pathMatch) {
+                    // 清洗转义符
+                    let path = pathMatch[1].split('\\\\u0026').join('&').split('\\\\/').join('/');
+                    
+                    // 去除 path 开头可能自带的斜杠，防止与前缀拼接出双斜杠错误 (//h5/m3u8)
+                    if (path.startsWith('/')) {
+                        path = path.substring(1);
+                    }
+                    
+                    // 3. 完美拼接 M3U8 播放直链
+                    let playUrl = realHost + '/h5/m3u8/' + path;
+                    
+                    // 传入 LISTS
+                    LISTS = [['正片$' + playUrl]];
+                } else {
+                    // 兜底 1：网页源码改版，正则失效
+                    LISTS = [['提取失败_请尝试嗅探$' + input]];
+                }
+            } catch (e) {
+                // 兜底 2：代码执行异常
+                LISTS = [['代码报错_请尝试嗅探$' + input]];
+            }
+        `
     }
 };
