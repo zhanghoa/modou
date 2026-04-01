@@ -4,13 +4,23 @@
   "sites": [
     {
       "key": "Madou_Official",
-      "name": "🔥麻豆｜终极克隆版",
+      "name": "🔥麻豆｜可用版",
       "type": 3,
       "api": "https://git.yylx.win/https://raw.githubusercontent.com/fantaiying7/EXT/refs/heads/main/drpy2.min.js",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "ext": "https://git.yylx.win/https://raw.githubusercontent.com/zhanghoa/modou/refs/heads/main/madou.js"
+    },
+    {
+      "key": "Test_Source",
+      "name": "🔥麻豆｜测试",
+      "type": 3,
+      "api": "https://git.yylx.win/https://raw.githubusercontent.com/fantaiying7/EXT/refs/heads/main/drpy2.min.js",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 0,
+      "ext": "https://git.yylx.win/https://raw.githubusercontent.com/zhanghoa/modou/refs/heads/main/madou123.js"
     }
   ],
   "parses": [],
