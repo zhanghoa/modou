@@ -1,47 +1,65 @@
+// 1. 初始化动态 Host (尝试从发布页获取最新节点)
+var dynamicHost = 'https://hwa0v.com/';
+try {
+    var response = request(dynamicHost, { withHeader: true, redirect: true, timeout: 3000 });
+    var finalUrl = response.url.split('?')[0];
+    if (finalUrl && finalUrl.startsWith('http')) {
+        dynamicHost = finalUrl.replace(/\/$/, ""); 
+    }
+} catch (e) {
+    // 请求超时则继续使用默认的 dynamicHost
+}
+
 var rule = {
-    title: '麻豆CloudFront',
-    host: 'https://d37o7jrn9y6vs2.cloudfront.net',
+    title: '麻豆CloudFront(直链显示版)',
+    host: dynamicHost,
     
-    // 分类链接
     url: '/topic/17521/fyclass/fypage/', 
-    
-    // 从导航栏提取的分类名与分类ID
     class_name: '精选好片&麻豆出品&女优试镜&爱豆传媒&星空传媒&精东影业&天美传媒&果冻传媒&91制片厂&大象传媒&福利姬&探花大神&黑料吃瓜&日本禁忌&制服OL&无码中出&中文字幕&欧美经典',
     class_url: '13678&13679&13684&13687&13686&13688&13931&13712&15812&15815&13713&13715&15153&13719&13722&13725&13726&13731', 
 
-    // 搜索接口
     searchUrl: '/searchvideo/**', 
     searchable: 2,
     quickSearch: 1,
     filterable: 0,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        'Referer': 'https://d2r1iw2cxonh4q.cloudfront.net/'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     },
     
-    // 开启解析，作为后备手段
     play_parse: true,
     lazy: '', 
     limit: 6,
 
-    // 推荐（首页）规则
     推荐: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
-
-    // 一级（分类列表页）规则
     一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
-
-    // 搜索结果页规则
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 二级（详情页）规则：提取演员、番号、简介，并利用 JS 直接提取直链
     二级: {
         "title": "h1&&Text",
-        "img": "", // 留空，TVBox会自动继承一级列表的封面图
-        // desc 格式依次为：演员; 年代(发行日期); 地区; 状态(番号); 导演
+        "img": "", 
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
-        "tabs": "js:TABS=['直链秒播']",
-        // 核心魔法：使用 JS 正则直接从网页代码中抠出 const path = "..." 里的 m3u8 地址，清洗转义符后拼接成真实播放直链
-        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$https://d37o7jrn9y6vs2.cloudfront.net/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
+        "tabs": "js:TABS=['直链解析']",
+        "lists": `js:
+            try {
+                // 获取当前域名的纯净前缀
+                var currentHost = VOD.vod_id.match(/https?:\\/\\/[^\\/]+/)[0];
+                
+                // 切割获取 path
+                var pathStr = html.split('const path = "')[1].split('"')[0];
+                pathStr = pathStr.split('\\\\/').join('/').split('\\\\u0026').join('&');
+                
+                // 拼接最终 URL
+                var playUrl = currentHost + '/h5/m3u8/' + pathStr;
+                
+                // 【新增功能】：生成两个按钮。第一个用来播放，第二个直接展示 URL
+                LISTS = [[
+                    '▶ 点击播放$' + playUrl, 
+                    '🔗 地址:' + playUrl + '$' + playUrl
+                ]];
+            } catch(e) {
+                LISTS = [['嗅探播放$' + VOD.vod_id]];
+            }
+        `
     }
 };
