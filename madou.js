@@ -1,6 +1,32 @@
 var rule = {
     title: '麻豆CloudFront',
-    host: 'https://d37o7jrn9y6vs2.cloudfront.net',
+    host: 'https://gnrre.com/', // 作为初始跳板地址
+    
+    // 【核心新增】预处理：自动拦截 301 跳转，动态更新最新域名
+    预处理: `js:
+        try {
+            let res = req(rule.host, { 
+                headers: rule.headers,
+                redirect: 0 
+            });
+            
+            let realHost = '';
+            if (res.headers && res.headers.Location) {
+                realHost = res.headers.Location;
+            } else if (res.url && res.url !== rule.host) {
+                realHost = res.url;
+            }
+
+            if (realHost) {
+                let match = realHost.match(/(https?:\\/\\/[^\\/]+)/);
+                if (match) {
+                    rule.host = match[1]; // 全局替换为主站最新域名
+                }
+            }
+        } catch(e) {
+            // 静默容错，如果预处理出错则继续沿用原 host
+        }
+    `,
     
     // 分类链接
     url: '/topic/17521/fyclass/fypage/', 
@@ -41,7 +67,7 @@ var rule = {
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
         "tabs": "js:TABS=['直链秒播']",
-        // 核心魔法：使用 JS 正则直接从网页代码中抠出 const path = "..." 里的 m3u8 地址，清洗转义符后拼接成真实播放直链
-        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$https://d37o7jrn9y6vs2.cloudfront.net/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
+        // 【已修复】将写死的 https://gnrre.com 替换为动态的 rule.host
+        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$'+rule.host+'/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
     }
 };
