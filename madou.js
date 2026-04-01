@@ -1,6 +1,6 @@
 var rule = {
-    title: '麻豆CloudFront(自适应版)',
-    host: 'https://hwa0v.com', // 这里填入最新的域名或发布页即可
+    title: '麻豆CloudFront',
+    host: 'https://d37o7jrn9y6vs2.cloudfront.net/',
     
     // 分类链接
     url: '/topic/17521/fyclass/fypage/', 
@@ -15,8 +15,8 @@ var rule = {
     quickSearch: 1,
     filterable: 0,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-        // 注意：删除了之前写死的 Referer，防止因域名对不上导致图片防盗链报错
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'Referer': 'https://d2r1iw2cxonh4q.cloudfront.net/'
     },
     
     // 开启解析，作为后备手段
@@ -33,7 +33,7 @@ var rule = {
     // 搜索结果页规则
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 二级（详情页）规则
+    // 二级（详情页）规则：提取演员、番号、简介，并利用 JS 直接提取直链
     二级: {
         "title": "h1&&Text",
         "img": "", // 留空，TVBox会自动继承一级列表的封面图
@@ -41,7 +41,7 @@ var rule = {
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
         "tabs": "js:TABS=['直链秒播']",
-        // 核心魔法修改：不写死域名！利用 JS 截取当前视频页面的真实域名，再与 path 拼接！
-        "lists": "js:try{var curHost=VOD.vod_id.split('/')[0]+'//'+VOD.vod_id.split('/')[2];var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$'+curHost+'/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
+        // 核心魔法：使用 JS 正则直接从网页代码中抠出 const path = "..." 里的 m3u8 地址，清洗转义符后拼接成真实播放直链
+        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$https://d2r1iw2cxonh4q.cloudfront.net/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
     }
 };
