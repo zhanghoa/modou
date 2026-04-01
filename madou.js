@@ -1,67 +1,47 @@
-// 1. 初始化动态 Host (尝试从发布页获取最新节点)
-var dynamicHost = 'https://hwa0v.com/';
-try {
-    var response = request(dynamicHost, { withHeader: true, redirect: true, timeout: 3000 });
-    var finalUrl = response.url.split('?')[0];
-    if (finalUrl && finalUrl.startsWith('http')) {
-        dynamicHost = finalUrl.replace(/\/$/, ""); 
-    }
-} catch (e) {
-    // 请求超时则继续使用默认的 dynamicHost
-}
-
 var rule = {
-    title: '麻豆CloudFront(自动更新版)',
-    host: dynamicHost,
+    title: '麻豆CloudFront(自适应版)',
+    host: 'https://hwa0v.com', // 这里填入最新的域名或发布页即可
     
+    // 分类链接
     url: '/topic/17521/fyclass/fypage/', 
     
+    // 从导航栏提取的分类名与分类ID
     class_name: '精选好片&麻豆出品&女优试镜&爱豆传媒&星空传媒&精东影业&天美传媒&果冻传媒&91制片厂&大象传媒&福利姬&探花大神&黑料吃瓜&日本禁忌&制服OL&无码中出&中文字幕&欧美经典',
     class_url: '13678&13679&13684&13687&13686&13688&13931&13712&15812&15815&13713&13715&15153&13719&13722&13725&13726&13731', 
 
+    // 搜索接口
     searchUrl: '/searchvideo/**', 
     searchable: 2,
     quickSearch: 1,
     filterable: 0,
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        'Referer': dynamicHost + '/' 
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+        // 注意：删除了之前写死的 Referer，防止因域名对不上导致图片防盗链报错
     },
     
+    // 开启解析，作为后备手段
     play_parse: true,
     lazy: '', 
     limit: 6,
 
+    // 推荐（首页）规则
     推荐: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
+
+    // 一级（分类列表页）规则
     一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
+
+    // 搜索结果页规则
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
+    // 二级（详情页）规则
     二级: {
         "title": "h1&&Text",
-        "img": "", 
+        "img": "", // 留空，TVBox会自动继承一级列表的封面图
+        // desc 格式依次为：演员; 年代(发行日期); 地区; 状态(番号); 导演
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
         "tabs": "js:TABS=['直链秒播']",
-        // 【核心修复】：使用多行模板字符串，从 VOD.vod_id 提取真正的 Host，用 split 提取并清洗 path
-        "lists": `js:
-            try {
-                // 1. 从当前视频详情页的真实链接中，安全地提取出域名部分
-                var currentHost = VOD.vod_id.match(/https?:\\/\\/[^\\/]+/)[0];
-                
-                // 2. 用 split 切割出 path 变量的值，避开正则匹配带来的不确定性
-                var pathStr = html.split('const path = "')[1].split('"')[0];
-                
-                // 3. 彻底清洗转义符：将 \\/ 变回 / ，将 \\u0026 变回 &
-                pathStr = pathStr.split('\\\\/').join('/').split('\\\\u0026').join('&');
-                
-                // 4. 将动态域名和清洗后的路径组装成最终的秒播地址
-                var playUrl = currentHost + '/h5/m3u8/' + pathStr;
-                
-                LISTS = [['正片$' + playUrl]];
-            } catch(e) {
-                // 如果网站源码大改导致上面提取失败，退回到内置嗅探模式兜底
-                LISTS = [['嗅探播放$' + VOD.vod_id]];
-            }
-        `
+        // 核心魔法修改：不写死域名！利用 JS 截取当前视频页面的真实域名，再与 path 拼接！
+        "lists": "js:try{var curHost=VOD.vod_id.split('/')[0]+'//'+VOD.vod_id.split('/')[2];var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$'+curHost+'/h5/m3u8/'+path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
     }
 };
