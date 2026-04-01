@@ -44,11 +44,11 @@ var rule = {
 
     二级: {
         "title": "h1&&Text",
-        "img": "",
+        "img": "", 
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
         "tabs": "js:TABS=['直链秒播']",
-        // 核心修改：动态获取 Host 拼接，增强了清洗正则
-        "lists": "js:try{var match=html.match(/const\\s+path\\s*=\\s*[\"'](.*?)[\"']/);if(match){var path=match[1].replace(/\\\\u0026/g,'&').replace(/\\\\\\//g,'/').replace(/\\\\/g,'');var playUrl=rule.host+'/h5/m3u8/'+path;LISTS=[['秒播源$'+playUrl]]}else{LISTS=[['网页嗅探$'+VOD.vod_id]]}}catch(e){LISTS=[['解析出错$'+VOD.vod_id]]}"
+        // 核心修复：将写死的域名替换为 rule.host，让播放地址跟随主域名动态变化
+        "lists": "js:try{var path=html.match(/const path = [\"']([^\"']+)[\"']/)[1];path=path.split('\\\\u0026').join('&').split('\\\\/').join('/');LISTS=[['正片$' + rule.host + '/h5/m3u8/' + path]]}catch(e){LISTS=[['嗅探播放$'+VOD.vod_id]]}"
     }
 };
