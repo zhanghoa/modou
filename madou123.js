@@ -1,42 +1,45 @@
-/*
- * 测试获取的域名是否以/结尾
- */
-
 var rule = {
     title: '域名结尾测试',
-    host: 'https://gnrre.com/', // 初始跳板入口
+    host: 'https://gnrre.com/', 
     
     预处理: `js:
         try {
-            rule.realHost = rule.host; // 设置默认值
-            let res = req(rule.host, { headers: rule.headers, redirect: 0 });
-            let targetUrl = (res.headers && res.headers.Location) ? res.headers.Location : res.url;
+            rule.realHost = rule.host; 
+            var res = req(rule.host, { headers: rule.headers, redirect: 0 });
+            
+            // 兼容大小写获取 Location
+            var location = res.headers && (res.headers.Location || res.headers.location);
+            var targetUrl = location ? location : res.url;
             
             if (targetUrl) {
-                let match = targetUrl.match(/(https?:\\/\\/[^\\/]+)/);
-                if (match) {
-                    rule.realHost = match[1]; // 保存跳转后的实际域名
-                    rule.headers['Referer'] = rule.realHost + '/';
+                // 如果是绝对路径跳转才进行正则匹配获取域名
+                if (targetUrl.startsWith('http')) {
+                    var match = targetUrl.match(/(https?:\\/\\/[^\\/]+)/);
+                    if (match) {
+                        rule.realHost = match[1]; // 正则已经天然去掉了末尾的 /
+                    }
                 }
             }
             
-            // 测试域名是否以/结尾
-            console.log('原始解析的域名:', rule.realHost);
-            console.log('域名是否以/结尾:', rule.realHost.endsWith('/'));
-            console.log('域名长度:', rule.realHost.length);
-            
-            // 如果以/结尾，则移除
+            // 兜底：确保一定没有末尾的 /
             if(rule.realHost.endsWith('/')) {
                 rule.realHost = rule.realHost.slice(0, -1);
-                console.log('修正后域名:', rule.realHost);
             }
+            
+            // 【关键修复】同步给框架全局的 rule.host，确保后续请求和 url 拼接正确
+            rule.host = rule.realHost;
+            rule.headers['Referer'] = rule.host + '/';
+            
+            console.log('=== 预处理结果 ===');
+            console.log('最终使用的合法域名:', rule.host);
             
         } catch(e) {
-            console.log('域名跳转失败:', e);
-            rule.realHost = rule.host;
-            if(rule.realHost.endsWith('/')) {
-                rule.realHost = rule.realHost.slice(0, -1);
+            console.log('域名处理异常:', e);
+            // 异常兜底也要去斜杠
+            if(rule.host.endsWith('/')) {
+                rule.host = rule.host.slice(0, -1);
             }
+            rule.realHost = rule.host;
         }
     `,
     
@@ -69,11 +72,8 @@ var rule = {
         "tabs": "js:TABS=['测试信息']",
         
         "lists": `js:
-            console.log('=== 域名测试信息 ===');
+            console.log('=== 二级列表域名信息 ===');
             console.log('实际域名:', rule.realHost);
-            console.log('域名是否以/结尾:', rule.realHost.endsWith('/'));
-            
-            // 简单的播放列表测试
             LISTS = [['域名测试$' + rule.realHost]];
         `
     }
