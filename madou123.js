@@ -1,5 +1,5 @@
 var rule = {
-    title: 'CloudFront',
+    title: 'CloudFront-界面调试版',
     host: 'https://gnrre.com/', // 初始跳板入口
     
     // 【核心一】预处理：自动拦截 301 跳转，记录最新域名，并动态更新防盗链 Referer
@@ -18,9 +18,10 @@ var rule = {
                     rule.headers['Referer'] = rule.realHost + '/';
                 }
             }
-            console.log('检测到的最新域名:', rule.realHost);
+            // 在变量中保存调试信息，供后续使用
+            rule.debugInfo = '检测到的域名: ' + rule.realHost;
         } catch(e) {
-            console.log('预处理错误:', e);
+            rule.debugInfo = '域名检测失败: ' + e.message;
         }
     `,
     
@@ -28,8 +29,8 @@ var rule = {
     url: '/topic/17521/fyclass/fypage/', 
     
     // 分类名与分类ID
-    class_name: '11',
-    class_url: '13678', 
+    class_name: '调试',
+    class_url: 'debug', 
 
     // 搜索接口
     searchUrl: '/searchvideo/**', 
@@ -38,12 +39,11 @@ var rule = {
     filterable: 0,
     headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        // 这里的 Referer 作为初始兜底，预处理执行完后会被上面的代码自动覆盖为最新的域名
         'Referer': 'https://d2r1iw2cxonh4q.cloudfront.net/'
     },
     
     // 开启解析，作为后备手段
-    play_parse: true,
+    play_parse: false, // 关闭解析以直接使用直链
     lazy: '', 
     limit: 6,
 
@@ -52,33 +52,64 @@ var rule = {
     一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 【核心二】二级（详情页）：为影视仓优化，显示播放地址
+    // 【核心二】二级（详情页）：界面调试版本
     二级: {
-        "title": "h1&&Text",
-        "img": "", // 留空，TVBox会自动继承一级列表的封面图
-        // desc 格式依次为：演员; 年代(发行日期); 地区; 状态(番号); 导演
-        "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
-        "content": ".vd-infos__desc&&Text",
+        "title": "js:VOD.title || '调试标题'",
+        "img": "",
+        "desc": "js:'域名: ' + rule.realHost + '\\n\\n' + rule.debugInfo",
+        "content": "js:'页面长度: ' + html.length + ' 字符'",
         "tabs": "js:TABS=['播放地址']",
-        // 核心魔法：使用 JS 正则直接从网页代码中抠出 const path = "..." 里的 m3u8 地址，清洗转义符后拼接成真实播放直链，并显示地址
         "lists": `js:
+            // 显示调试信息
+            console.log('开始解析二级页面...');
+            
             try {
-                var path = html.match(/const path = ["']([^"']+)["']/)[1];
-                path = path.split('\\\\u0026').join('&').split('\\\\/').join('/');
-                
-                // 构造播放地址，使用动态获取的真实域名
-                var playUrl = rule.realHost + '/h5/m3u8/' + path;
-                
-                // 在控制台显示播放地址
-                console.log('提取的播放地址:', playUrl);
-                
-                // 为影视仓创建带有地址信息的播放列表
-                // 使用标签显示地址的一部分以便识别
-                var shortUrl = playUrl.length > 50 ? playUrl.substring(0, 50) + '...' : playUrl;
-                LISTS = [[shortUrl + '$' + playUrl]];
+                // 查找path变量
+                var pathMatch = html.match(/const path = ["']([^"']+)["']/);
+                if(pathMatch) {
+                    var path = pathMatch[1];
+                    path = path.split('\\\\u0026').join('&').split('\\\\/').join('/');
+                    
+                    // 构造播放地址
+                    var playUrl = rule.realHost + '/h5/m3u8/' + path;
+                    
+                    // 更新内容显示更多信息
+                    VOD.content = '页面长度: ' + html.length + ' 字符\\n\\n' +
+                                  '域名: ' + rule.realHost + '\\n\\n' +
+                                  '提取的Path: ' + path + '\\n\\n' +
+                                  '播放地址: ' + playUrl;
+                    
+                    // 创建播放列表，将地址显示在标签中
+                    var displayUrl = playUrl.length > 40 ? playUrl.substring(0, 40) + '...' : playUrl;
+                    LISTS = [['地址: ' + displayUrl + '$' + playUrl]];
+                } else {
+                    // 如果没找到path，显示页面中可能的链接
+                    var debugLists = [];
+                    var m3u8Matches = html.match(/https?:\\/\\/[^"'\\s]*\\.m3u8[^"'\\s]*/g);
+                    if(m3u8Matches) {
+                        for(var i = 0; i < m3u8Matches.length; i++) {
+                            var url = m3u8Matches[i];
+                            var dispUrl = url.length > 40 ? url.substring(0, 40) + '...' : url;
+                            debugLists.push(['M3U8-' + (i+1) + ': ' + dispUrl + '$' + url]);
+                        }
+                    } else {
+                        // 如果连m3u8都没找到，至少显示一些调试信息
+                        debugLists.push(['解析失败-无地址$' + VOD.vod_id]);
+                    }
+                    
+                    // 更新内容显示调试信息
+                    VOD.content = '页面长度: ' + html.length + ' 字符\\n\\n' +
+                                  '域名: ' + rule.realHost + '\\n\\n' +
+                                  '未找到path变量，正在搜索其他可能的链接...';
+                    
+                    LISTS = debugLists;
+                }
             } catch(e) {
-                console.log('解析播放地址失败:', e);
-                LISTS = [['嗅探播放$' + VOD.vod_id]];
+                // 发生错误时，显示错误信息
+                VOD.content = '解析错误: ' + e.message + '\\n\\n' +
+                              '页面长度: ' + html.length + ' 字符\\n\\n' +
+                              '域名: ' + rule.realHost;
+                LISTS = [['错误: ' + e.message + '$' + VOD.vod_id]];
             }
         `
     }
