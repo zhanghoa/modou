@@ -57,7 +57,7 @@ var rule = {
     // 搜索结果页规则
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 二级（详情页）规则：提取演员、番号、简介，并利用 JS 直接提取直链
+    // 二级（详情页）规则：使用原始可用配置，确保视频介绍正常显示
     二级: {
         "title": "h1&&Text",
         "img": "", // 留空，TVBox会自动继承一级列表的封面图
@@ -78,10 +78,11 @@ var rule = {
                 console.log('提取的播放地址:', playUrl);
                 
                 // 在播放列表中显示地址信息
-                var shortAddr = playUrl.length > 50 ? playUrl.substring(0, 50) + '...' : playUrl;
+                var shortAddr = playUrl.length > 40 ? playUrl.substring(0, 40) + '...' : playUrl;
                 LISTS = [['地址: ' + shortAddr + '$' + playUrl]];
             } catch(e) {
                 console.log('解析播放地址失败:', e);
+                // 即使解析失败，也要确保播放列表存在
                 LISTS = [['嗅探播放$' + VOD.vod_id]];
             }
         `
