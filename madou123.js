@@ -52,14 +52,14 @@ var rule = {
     一级: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
     搜索: '.section-content__item:has(a[data-type="0"]); h3&&Text; .item-cover img&&data-src; .cover-duration&&Text; a&&href',
 
-    // 【核心二】二级（详情页）：保留原始工作配置，显示播放地址
+    // 【核心二】二级（详情页）：为影视仓优化，显示播放地址
     二级: {
         "title": "h1&&Text",
         "img": "", // 留空，TVBox会自动继承一级列表的封面图
         // desc 格式依次为：演员; 年代(发行日期); 地区; 状态(番号); 导演
         "desc": ".related-gls__content h5&&Text; .vd-infos p:eq(0)&&Text; ; .vd-infos p:eq(1)&&Text; ", 
         "content": ".vd-infos__desc&&Text",
-        "tabs": "js:TABS=['直链秒播-查看地址']",
+        "tabs": "js:TABS=['播放地址']",
         // 核心魔法：使用 JS 正则直接从网页代码中抠出 const path = "..." 里的 m3u8 地址，清洗转义符后拼接成真实播放直链，并显示地址
         "lists": `js:
             try {
@@ -72,11 +72,13 @@ var rule = {
                 // 在控制台显示播放地址
                 console.log('提取的播放地址:', playUrl);
                 
-                // 创建包含播放地址信息的播放列表
-                LISTS = [['正片$' + playUrl + '$' + playUrl]]; // 格式：显示名称$播放地址$扩展信息
+                // 为影视仓创建带有地址信息的播放列表
+                // 使用标签显示地址的一部分以便识别
+                var shortUrl = playUrl.length > 50 ? playUrl.substring(0, 50) + '...' : playUrl;
+                LISTS = [[shortUrl + '$' + playUrl]];
             } catch(e) {
                 console.log('解析播放地址失败:', e);
-                LISTS = [['嗅探播放$' + VOD.vod_id + '$' + VOD.vod_id]];
+                LISTS = [['嗅探播放$' + VOD.vod_id]];
             }
         `
     }
